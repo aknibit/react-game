@@ -13,7 +13,6 @@ npm run dev
 You can start the project using:
 
 ```bash
-# and then...
 npm run start
 # or
 npm start
