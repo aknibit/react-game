@@ -1,77 +1,102 @@
 import { useState } from "react";
-
-enum Player {
-  Red = "red",
-  Blue = "blue",
-}
+import {
+  Player,
+  Cell,
+  assignRandomPlayers,
+  initializeBoard,
+  redrawBoard,
+  checkWinner,
+} from "../utils/gameLogic";
+import {
+  boardCell,
+  TurnIndicator,
+  WinnerAnnouncement,
+} from "@/components/partials";
 
 export default function Home() {
   const [cols, setCols] = useState(10);
   const [nextPlayer, setNextPlayer] = useState<Player>();
+  const [board, setBoard] = useState<Cell[]>([]);
+  const [winner, setWinner] = useState<Player>();
+  const isGameRunning = Boolean(nextPlayer) && !winner;
+  const isGameOver = Boolean(winner);
 
-  const startGame = () => {
-    if (nextPlayer) {
-      setNextPlayer(undefined);
-    } else {
-      setNextPlayer(Math.random() > 0.5 ? Player.Red : Player.Blue);
+  const resetGame = () => {
+    setWinner(undefined);
+    setNextPlayer(undefined);
+    setBoard([]);
+  };
+
+  const newGame = () => {
+    setWinner(undefined);
+    if (cols > 200) {
+      alert("The board is too big to be rendered on a single line");
+      return;
     }
+    if (cols < 5) {
+      alert("There is not enough space for a fair game");
+    }
+    setNextPlayer(Math.random() > 0.5 ? Player.Red : Player.Blue);
+    const emptyBoard = initializeBoard(cols);
+    const initialBoard = assignRandomPlayers(emptyBoard, cols);
+    setBoard(initialBoard);
   };
 
   const executeMove = (col: number) => {
-    console.log(nextPlayer, "clicked", col);
-    const nextOne = nextPlayer === Player.Red ? Player.Blue : Player.Red;
-    setNextPlayer(nextOne);
+    if (isGameOver || !nextPlayer) return;
+    if (board[col].player === nextPlayer) {
+      alert("You can't move to your own cell");
+      return;
+    }
+    const updatedBoard = redrawBoard(board, col, nextPlayer);
+    setBoard(updatedBoard);
+
+    const winningPlayer = checkWinner(updatedBoard, nextPlayer);
+    if (winningPlayer) {
+      setWinner(nextPlayer);
+      setNextPlayer(undefined);
+    } else {
+      setNextPlayer((val) => (val === Player.Red ? Player.Blue : Player.Red));
+    }
   };
 
   return (
-    <div className="bg-gray-900 grid items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <section className="flex gap-2 items-center sm:items-start">
+    <div className="holder">
+      <section className="config-area">
         <input
           className="bg-gray-700 p-2"
           hidden={nextPlayer ? true : false}
           type="number"
-          placeholder="cols"
           value={cols}
           onChange={(ev) => {
             setCols(Number(ev.target.value));
           }}
         />
-        <button className="bg-green-800 py-2 px-4" onClick={startGame}>
-          {nextPlayer ? "RESTART" : "START"}
-        </button>
+        {isGameRunning && (
+          <button
+            className="bg-yellow-800 p-elm cursor-pointer"
+            onClick={resetGame}
+          >
+            RESTART
+          </button>
+        )}
+        {!isGameRunning && (
+          <button
+            className="bg-green-800 p-elm cursor-pointer"
+            onClick={newGame}
+          >
+            START
+          </button>
+        )}
       </section>
 
-      <section className="center">
-        <div className="flex gap-1">
-          {nextPlayer &&
-            Array.from({ length: cols }).map((_, i) => (
-              <div
-                key={i}
-                className="bg-gray-800 h-12 w-12 flex items-center justify-center text-white"
-                onClick={() => {
-                  executeMove(i);
-                }}
-              ></div>
-            ))}
-        </div>
+      <section className="center flex w-full gap-1">
+        {board.map((data, pos) => boardCell(data.player, pos, executeMove))}
       </section>
 
       <section>
-        {nextPlayer && (
-          <div
-            className={`${nextPlayer === "red" ? "bg-red-800/30" : "bg-blue-800/30"} py-2 px-4`}
-          >
-            <p>
-              Turn for{" "}
-              <span
-                className={`${nextPlayer === "red" ? "text-red-400" : "text-blue-400"} font-bold`}
-              >
-                {nextPlayer}{" "}
-              </span>
-              team
-            </p>
-          </div>
-        )}
+        {isGameRunning && <TurnIndicator player={nextPlayer} />}
+        {isGameOver && <WinnerAnnouncement winnner={winner} />}
       </section>
     </div>
   );

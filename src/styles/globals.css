@@ -4,3 +4,23 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   color: white;
 }
+
+.holder {
+  @apply bg-gray-900 grid items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20;
+}
+
+.config-area {
+  @apply flex gap-2 items-center sm:items-start;
+}
+
+.p-elm {
+  @apply py-2 px-4;
+}
+
+.bg-red {
+  @apply bg-red-800/30;
+}
+
+.bg-blue {
+  @apply bg-blue-800/30;
+}
