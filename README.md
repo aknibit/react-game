@@ -4,10 +4,10 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+First, install de dependencies:
 
 ```bash
-npm run dev
+npm install
 ```
 
 You can start the project using:
@@ -17,6 +17,11 @@ npm run start
 # or
 npm start
 # in both cases, project will be build automatically
+```
+
+```bash
+# for developing purposes
+npm run dev
 ```
 
 Besides basic functionality:
